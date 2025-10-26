@@ -66,6 +66,7 @@
           <div class="results-chart-wrap">
             <canvas id="resultsChart" width="300" height="300" aria-label="Result chart"></canvas>
           </div>
+          <p class="verdict-banner" id="resultVerdict">Loading verdict…</p>
           <p class="chart-summary" id="resultChartSummary">Loading verdict…</p>
           <a class="btn secondary" id="resultSourceButton" target="_blank" rel="noopener">Read the article</a>
         </article>
@@ -128,6 +129,7 @@
 
     const article = payload.article || {};
     const sourceLink = document.getElementById('resultSourceLink');
+    let resultError = false;
     if (article.url) {
       sourceLink.textContent = article.title || article.url;
       sourceLink.href = article.url;
@@ -139,6 +141,7 @@
       sourceLink.textContent = 'Not available';
       sourceLink.removeAttribute('href');
       if (sourceButton) sourceButton.hidden = true;
+      resultError = true;
     }
 
     setText('resultPublisher', article.publisher || article.title || 'Unknown publisher');
@@ -149,18 +152,46 @@
     setText('resultBias', biasValue);
     setText('resultReliability', reliabilityValue);
     setText('resultSnippet', article.snippet || 'No article snippet available.');
-    if (chartSummaryEl) {
+    const factual = Number(payload.analysis.factualPercentage);
+    const misinformation = Number(payload.analysis.misinformationPercentage);
+    const validScores = Number.isFinite(factual) && Number.isFinite(misinformation);
+    const safeFactual = validScores ? factual : 0;
+    const safeMisinformation = validScores ? misinformation : 0;
+    setText('resultFactual', validScores ? `${safeFactual}%` : 'N/A');
+    setText('resultMisinformation', validScores ? `${safeMisinformation}%` : 'N/A');
+
+    if (!validScores) {
+      resultError = true;
+    }
+    const dominantLabel = resultError ? 'Factual' : (safeFactual >= safeMisinformation ? 'Factual' : 'Misinformation');
+    const dominantValue = resultError ? 0 : (dominantLabel === 'Factual' ? safeFactual : safeMisinformation);
+
+    if (resultError && chartSummaryEl) {
+      chartSummaryEl.textContent = 'We were unable to retrieve enough evidence to provide a verdict.';
+    } else if (chartSummaryEl) {
       chartSummaryEl.textContent = payload.analysis.summary || 'No summary provided.';
     }
 
-    const factual = Number(payload.analysis.factualPercentage) || 0;
-    const misinformation = Number(payload.analysis.misinformationPercentage) || 0;
-    setText('resultFactual', `${factual}%`);
-    setText('resultMisinformation', `${misinformation}%`);
-    const dominantLabel = factual >= misinformation ? 'Factual' : 'Misinformation';
-    const dominantValue = dominantLabel === 'Factual' ? factual : misinformation;
+    const verdictBanner = document.getElementById('resultVerdict');
+    if (verdictBanner) {
+      const neutral = Math.abs(safeFactual - safeMisinformation) <= 5;
+      let verdict;
+      if (resultError) {
+        verdict = 'We were unable to retrieve enough evidence to provide a verdict.';
+      } else if (neutral) {
+        verdict = 'We can’t deliver a confident verdict yet — more evidence is needed.';
+      } else if (dominantLabel === 'Factual') {
+        verdict = 'Our sources verify this claim as factual.';
+      } else {
+        verdict = 'Our sources believe this claim is false.';
+      }
+      verdictBanner.textContent = verdict;
+      verdictBanner.classList.toggle('verdict-factual', !neutral && dominantLabel === 'Factual' && !resultError);
+      verdictBanner.classList.toggle('verdict-misinformation', !neutral && dominantLabel === 'Misinformation' && !resultError);
+      verdictBanner.classList.toggle('verdict-neutral', neutral || resultError);
+    }
 
-    if (typeof Chart !== 'undefined') {
+    if (validScores && typeof Chart !== 'undefined') {
       const centerTag = {
         id: 'resultsCenterTag',
         afterDraw(chart) {
@@ -186,7 +217,7 @@
         data: {
           labels: ['Misinformation', 'Factual'],
           datasets: [{
-            data: [misinformation, factual],
+            data: [safeMisinformation, safeFactual],
             backgroundColor: ['#d70022', '#008f4c'],
             borderWidth: 0
           }]
@@ -198,6 +229,14 @@
         },
         plugins: [centerTag]
       });
+    } else {
+      const chartEl = document.getElementById('resultsChart');
+      if (chartEl) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'chart-placeholder';
+        placeholder.textContent = 'Chart unavailable.';
+        chartEl.replaceWith(placeholder);
+      }
     }
   });
   </script>
