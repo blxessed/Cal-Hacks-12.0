@@ -51,21 +51,13 @@
 
         <article class="card-hero reveal" aria-labelledby="factSplitTitle">
           <div class="card-copy">
-            <h3 id="factSplitTitle" class="mt-0">Latest Result</h3>
-            <p class="meta" id="factSplitMeta">Run an analysis to generate live results.</p>
-            <div class="analysis-details" id="analysisDetails">
-              <p class="analysis-summary" id="analysisSummary">Submit a claim and we’ll summarize the article we trust most.</p>
-              <dl class="analysis-meta">
-                <div>
-                  <dt>Source</dt>
-                  <dd><a id="analysisSource" target="_blank" rel="noopener">Not available</a></dd>
-                </div>
-                <div>
-                  <dt>Checked</dt>
-                  <dd id="analysisTimestamp">—</dd>
-                </div>
-              </dl>
-            </div>
+            <h3 id="factSplitTitle" class="mt-0">Result</h3>
+            <p class="meta" id="factSplitMeta" data-state="misleading">Example result: 62% misleading • 38% factual</p>
+            <ul class="insight-list" id="factSplitInsights">
+              <li><strong>Summary:</strong> Viral clip omits key context from the full interview; official transcript contradicts the claim.</li>
+              <li><strong>Misleading:</strong> 62% of reviewed coverage flagged for sensational framing.</li>
+              <li><strong>Factual:</strong> 38% of sources provide corroborated information.</li>
+            </ul>
           </div>
           <div class="chart-wrap" role="img" aria-label="Misleading versus factual assessment">
             <canvas id="factSplit" width="200" height="200"></canvas>

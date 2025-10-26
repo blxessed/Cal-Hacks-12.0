@@ -34,11 +34,14 @@ if (toTop) {
 
 const chartCanvas = document.getElementById('factSplit');
 const factSplitMeta = document.getElementById('factSplitMeta');
-const summaryEl = document.getElementById('analysisSummary');
-const sourceEl = document.getElementById('analysisSource');
-const timestampEl = document.getElementById('analysisTimestamp');
+const insightsEl = document.getElementById('factSplitInsights');
 
 const RESULT_STORAGE_KEY = 'facttrace:lastResult';
+const DEFAULT_RESULT = {
+  misinformation: 62,
+  factual: 38,
+  summary: 'Viral clip omits key context from the full interview; official transcript contradicts the claim.'
+};
 
 const textBox = document.getElementById('textBox');
 const countsEl = document.getElementById('counts');
@@ -113,7 +116,7 @@ const setAnalyzing = (value) => {
 
 const ensureChart = () => {
   if (state.chart || typeof Chart === 'undefined' || !chartCanvas) return state.chart;
-  const colors = ['#d70022', '#008f4c'];
+  const colors = ['#ff3b30', '#34c759'];
   const centerTag = {
     id: 'centerTag',
     afterDraw(chart) {
@@ -143,9 +146,9 @@ const ensureChart = () => {
   state.chart = new Chart(chartCanvas, {
     type: 'doughnut',
     data: {
-      labels: ['Misinformation', 'Factual'],
+      labels: ['Misleading', 'Factual'],
       datasets: [{
-        data: [50, 50],
+        data: [DEFAULT_RESULT.misinformation, DEFAULT_RESULT.factual],
         backgroundColor: colors,
         borderWidth: 0,
         hoverOffset: 0
@@ -162,61 +165,48 @@ const ensureChart = () => {
   return state.chart;
 };
 
-const updateChartValues = (misinformation = 50, factual = 50) => {
+const updateChartData = (misinformation = 50, factual = 50) => {
   const chart = ensureChart();
   if (!chart) return;
   chart.data.datasets[0].data = [misinformation, factual];
   chart.update();
-  if (factSplitMeta) {
-    const dominant = factual >= misinformation ? 'factual' : 'misleading';
-    factSplitMeta.dataset.state = dominant;
-    factSplitMeta.textContent = `Result: ${misinformation}% misinformation • ${factual}% factual`;
-  }
 };
 
-const safeHostname = (url) => {
-  try {
-    const host = new URL(url).hostname;
-    return host.replace(/^www\./, '');
-  } catch (_) {
-    return null;
-  }
+const setMeta = (misinformation, factual, { example = false } = {}) => {
+  if (!factSplitMeta) return;
+  const dominant = factual >= misinformation ? 'factual' : 'misleading';
+  factSplitMeta.dataset.state = dominant;
+  const label = example ? 'Example result' : 'Result';
+  factSplitMeta.textContent = `${label}: ${misinformation}% misleading • ${factual}% factual`;
+};
+
+const renderInsights = (summary, misinformation, factual, { example = false } = {}) => {
+  if (!insightsEl) return;
+  const safeSummary = summary && summary.trim()
+    ? summary.trim()
+    : (example ? DEFAULT_RESULT.summary : 'No summary returned.');
+
+  insightsEl.innerHTML = `
+    <li><strong>Summary:</strong> ${safeSummary}</li>
+    <li><strong>Misleading:</strong> ${misinformation}% of reviewed content.</li>
+    <li><strong>Factual:</strong> ${factual}% of reviewed content.</li>
+  `.trim();
+};
+
+const applyResult = (misinformation, factual, summary, options = {}) => {
+  const mis = Math.max(0, Math.min(100, Math.round(misinformation)));
+  const fac = Math.max(0, Math.min(100, Math.round(factual)));
+  updateChartData(mis, fac);
+  setMeta(mis, fac, options);
+  renderInsights(summary, mis, fac, options);
 };
 
 const renderAnalysis = (payload) => {
   const factual = Number(payload?.analysis?.factualPercentage) || 0;
   const misinformation = Number(payload?.analysis?.misinformationPercentage) || 0;
-  updateChartValues(misinformation, factual);
+  const summary = payload?.analysis?.summary || payload?.article?.description || '';
 
-  if (summaryEl) {
-    summaryEl.textContent = payload?.analysis?.summary || payload?.article?.description || 'No summary returned.';
-  }
-  if (timestampEl) {
-    const date = payload?.analyzedAt ? new Date(payload.analyzedAt) : null;
-    if (date && !Number.isNaN(date.getTime())) {
-      timestampEl.textContent = date.toLocaleString();
-    } else if (payload?.analyzedAt) {
-      timestampEl.textContent = payload.analyzedAt;
-    } else {
-      timestampEl.textContent = '—';
-    }
-  }
-  if (sourceEl) {
-    if (payload?.article?.url) {
-      const label = payload.article.title || safeHostname(payload.article.url) || 'View article';
-      sourceEl.textContent = label;
-      sourceEl.href = payload.article.url;
-      sourceEl.target = '_blank';
-      sourceEl.rel = 'noopener';
-      sourceEl.style.pointerEvents = '';
-    } else {
-      sourceEl.textContent = 'Not available';
-      sourceEl.removeAttribute('href');
-      sourceEl.removeAttribute('target');
-      sourceEl.removeAttribute('rel');
-      sourceEl.style.pointerEvents = 'none';
-    }
-  }
+  applyResult(misinformation, factual, summary, { example: false });
 };
 
 const submitAnalysis = async (query) => {
@@ -291,8 +281,8 @@ if (textBox) {
   autoResize(textBox);
 }
 
-ensureChart();
-updateCounts();
+applyResult(DEFAULT_RESULT.misinformation, DEFAULT_RESULT.factual, DEFAULT_RESULT.summary, { example: true });
+
 if (clearTextBtn && textBox) {
   clearTextBtn.addEventListener('click', () => {
     textBox.value = '';
