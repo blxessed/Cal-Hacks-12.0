@@ -78,7 +78,8 @@ const determineApiBase = () => {
 };
 
 const apiBase = determineApiBase();
-const buildUrl = (path) => {
+const buildUrl = (path = '') => {
+  if (/^https?:\/\//i.test(path)) return path;
   if (!path.startsWith('/')) path = `/${path}`;
   return apiBase ? `${apiBase}${path}` : path;
 };
