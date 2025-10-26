@@ -213,7 +213,7 @@ const submitAnalysis = async (query) => {
   setStatusMessage('Analyzing…', 'info');
   setAnalyzing(true);
   try {
-    const response = await fetch(buildUrl('/api/analyze'), {
+    const response = await fetch(buildUrl('https://api.facttrace.tech/api/analyze'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
