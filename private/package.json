@@ -4,12 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "NODE_ENV=development node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rahim Amjad",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.12.2",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "http": "^0.0.1-security",
+    "url": "^0.11.4"
+  },
+  "devDependencies": {
+    "@ljharb/tsconfig": "^0.3.2"
   }
 }
