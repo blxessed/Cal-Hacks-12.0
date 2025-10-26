@@ -48,48 +48,46 @@
         </div>
       </section>
 
-      <div class="results-grid">
-        <article class="results-card" aria-labelledby="resultsChartTitle">
-          <div class="results-chart-header">
-            <h2 id="resultsChartTitle">Factual vs misinformation</h2>
-            <div class="results-score">
-              <div>
-                <span class="meta-label">Factual</span>
-                <span id="resultFactual" class="score-value">0%</span>
-              </div>
-              <div>
-                <span class="meta-label">Misinformation</span>
-                <span id="resultMisinformation" class="score-value">0%</span>
-              </div>
+      <article class="results-card" aria-labelledby="resultsChartTitle">
+        <div class="results-chart-header">
+          <h2 id="resultsChartTitle">Factual vs misinformation</h2>
+          <div class="results-score">
+            <div>
+              <span class="meta-label">Factual</span>
+              <span id="resultFactual" class="score-value">0%</span>
+            </div>
+            <div>
+              <span class="meta-label">Misinformation</span>
+              <span id="resultMisinformation" class="score-value">0%</span>
             </div>
           </div>
-          <div class="results-chart-wrap">
-            <canvas id="resultsChart" width="300" height="300" aria-label="Result chart"></canvas>
-          </div>
-          <p class="verdict-banner" id="resultVerdict">Loading verdict…</p>
-          <p class="chart-summary" id="resultChartSummary">Loading verdict…</p>
-          <a class="btn secondary" id="resultSourceButton" target="_blank" rel="noopener">Read the article</a>
-        </article>
+        </div>
+        <div class="results-chart-wrap">
+          <canvas id="resultsChart" width="300" height="300" aria-label="Result chart"></canvas>
+        </div>
+        <p class="verdict-banner" id="resultVerdict">Loading verdict…</p>
+        <p class="chart-summary" id="resultChartSummary">Loading verdict…</p>
+        <a class="btn secondary" id="resultSourceButton" target="_blank" rel="noopener">Read the article</a>
+      </article>
 
-        <article class="results-card" aria-labelledby="sourceDetailsTitle">
-          <h2 id="sourceDetailsTitle">Source reliability</h2>
-          <dl class="results-details">
-            <div>
-              <dt>Publisher</dt>
-              <dd id="resultPublisher">—</dd>
-            </div>
-            <div>
-              <dt>Bias mean</dt>
-              <dd id="resultBias">—</dd>
-            </div>
-            <div>
-              <dt>Reliability</dt>
-              <dd id="resultReliability">—</dd>
-            </div>
-          </dl>
-          <p class="muted" id="resultSnippet">Snippet unavailable.</p>
-        </article>
-      </div>
+      <article class="results-card" aria-labelledby="sourceDetailsTitle">
+        <h2 id="sourceDetailsTitle">Source reliability</h2>
+        <dl class="results-details">
+          <div>
+            <dt>Publisher</dt>
+            <dd id="resultPublisher">—</dd>
+          </div>
+          <div>
+            <dt>Bias mean</dt>
+            <dd id="resultBias">—</dd>
+          </div>
+          <div>
+            <dt>Reliability</dt>
+            <dd id="resultReliability">—</dd>
+          </div>
+        </dl>
+        <p class="muted" id="resultSnippet">Snippet unavailable.</p>
+      </article>
     </div>
   </main>
 
@@ -189,6 +187,15 @@
       verdictBanner.classList.toggle('verdict-factual', !neutral && dominantLabel === 'Factual' && !resultError);
       verdictBanner.classList.toggle('verdict-misinformation', !neutral && dominantLabel === 'Misinformation' && !resultError);
       verdictBanner.classList.toggle('verdict-neutral', neutral || resultError);
+    }
+
+    const rawEl = document.getElementById('resultRaw');
+    if (rawEl) {
+      try {
+        rawEl.textContent = JSON.stringify(payload, null, 2);
+      } catch (err) {
+        rawEl.textContent = 'Unable to display raw payload.';
+      }
     }
 
     if (validScores && typeof Chart !== 'undefined') {
