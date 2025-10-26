@@ -221,6 +221,11 @@ nav a.active {
 }
 .status { font-size: .92rem; color: var(--muted); }
 .status-alert { min-height: 20px; }
+.disclaimer {
+  margin-top: 20px;
+  font-size: .9rem;
+  color: var(--muted);
+}
 
 .how-it-works {
   padding: 90px 0 110px;
