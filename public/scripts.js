@@ -261,6 +261,11 @@ const analyzeClaim = () => {
     textBox.focus();
     return;
   }
+  if (/https?:\/\//i.test(query)) {
+    setStatusMessage('Please paste the relevant text or summary instead of a direct link.', 'error');
+    textBox.focus();
+    return;
+  }
   submitAnalysis(query);
 };
 
