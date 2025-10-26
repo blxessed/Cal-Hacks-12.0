@@ -69,7 +69,7 @@ const determineApiBase = () => {
   const origin = window.location?.origin;
   const hostname = window.location?.hostname || '';
   const port = window.location?.port || '';
-  if (!origin || origin === 'null') return 'https://www.facttrace.tech';
+  if (!origin || origin === 'null') return 'https://api.facttrace.tech';
   const localHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
   if (localHosts.has(hostname) && port !== '8787') {
     return 'http://localhost:8787';
