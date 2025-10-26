@@ -54,8 +54,16 @@ const state = { chart: null, analyzing: false };
 const determineApiBase = () => {
   if (typeof window === 'undefined') return '';
   if (window.FACTTRACE_API_BASE) return String(window.FACTTRACE_API_BASE).replace(/\/$/, '');
+  const metaBase = document.querySelector('meta[name="facttrace-api"]')?.content;
+  if (metaBase) return metaBase.replace(/\/$/, '');
   const origin = window.location?.origin;
+  const hostname = window.location?.hostname || '';
+  const port = window.location?.port || '';
   if (!origin || origin === 'null') return 'http://localhost:8787';
+  const localHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
+  if (localHosts.has(hostname) && port !== '8787') {
+    return 'http://localhost:8787';
+  }
   return '';
 };
 
