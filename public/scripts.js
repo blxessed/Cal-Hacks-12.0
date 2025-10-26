@@ -1,276 +1,313 @@
 const menuBtn = document.getElementById('menuBtn');
 const navList = document.getElementById('navList');
-menuBtn.addEventListener('click', () => navList.classList.toggle('open'));
+if (menuBtn && navList) {
+  menuBtn.addEventListener('click', () => navList.classList.toggle('open'));
+}
 
-const sections = document.querySelectorAll('section');
+const sections = document.querySelectorAll('section[id]');
 const links = document.querySelectorAll('nav a');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      links.forEach(l => l.classList.remove('active'));
-      const id = entry.target.id;
-      const active = document.querySelector(`nav a[href="#${id}"]`);
-      if (active) active.classList.add('active');
-    }
-  });
-}, { threshold: 0.6 });
-sections.forEach(sec => observer.observe(sec));
+if (sections.length && links.length) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(link => link.classList.remove('active'));
+        const id = entry.target.id;
+        const active = document.querySelector(`nav a[href="#${id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(section => observer.observe(section));
+}
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.2 });
-document.querySelectorAll('.reveal, .tile').forEach(el => revealObserver.observe(el));
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 const toTop = document.getElementById('toTop');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 500) toTop.classList.add('show'); else toTop.classList.remove('show');
-});
-
-const counters = document.querySelectorAll('[data-counter]');
-const countObs = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const el = entry.target;
-      if (el.dataset.counterAnimated === 'true') {
-        countObs.unobserve(el);
-        return;
-      }
-      const target = Number(el.dataset.counter);
-      if (!Number.isFinite(target)) {
-        countObs.unobserve(el);
-        return;
-      }
-      let current = 0;
-      const step = Math.max(1, Math.round(target / 60));
-
-      const tick = () => {
-        current += step;
-        if (current >= target) {
-          el.textContent = target;
-          el.dataset.counterAnimated = 'true';
-          countObs.unobserve(el);
-        } else {
-          el.textContent = current;
-          requestAnimationFrame(tick);
-        }
-      };
-
-      requestAnimationFrame(tick);
-    }
+if (toTop) {
+  document.addEventListener('scroll', () => {
+    if (window.scrollY > 500) toTop.classList.add('show'); else toTop.classList.remove('show');
   });
-}, { threshold: 1 });
-counters.forEach(c => countObs.observe(c));
-
-const activeMembersEl = document.getElementById('activeMembersCount');
-if (activeMembersEl) {
-  const discordWidgetUrl = 'https://discord.com/api/guilds/1417669547388964866/widget.json';
-  const applyMemberCount = (count) => {
-    const memberCount = Math.max(0, Math.round(count));
-    const countString = String(memberCount);
-    activeMembersEl.dataset.counter = countString;
-    activeMembersEl.setAttribute('data-counter', countString);
-    if (activeMembersEl.dataset.counterAnimated === 'true') {
-      activeMembersEl.textContent = memberCount;
-    } else {
-      activeMembersEl.textContent = memberCount;
-      activeMembersEl.dataset.counterAnimated = 'true';
-      try { countObs.unobserve(activeMembersEl); } catch (_) {}
-    }
-  };
-  const setMemberCountUnavailable = () => {
-    activeMembersEl.dataset.counter = 'N/A';
-    activeMembersEl.setAttribute('data-counter', 'N/A');
-    activeMembersEl.textContent = 'N/A';
-    activeMembersEl.dataset.counterAnimated = 'true';
-    try { countObs.unobserve(activeMembersEl); } catch (_) {}
-  };
-  const resolveMemberCount = (payload) => {
-    if (Array.isArray(payload?.members)) return payload.members.length;
-    const fallbackFields = [payload?.presence_count, payload?.approximate_presence_count, payload?.approximate_member_count];
-    for (const value of fallbackFields) {
-      const numeric = Number(value);
-      if (Number.isFinite(numeric)) return numeric;
-    }
-    return NaN;
-  };
-  const encodedWidgetUrl = encodeURIComponent(discordWidgetUrl);
-  const widgetSources = [
-    discordWidgetUrl,
-    `https://cors.isomorphic-git.org/${discordWidgetUrl}`,
-    `https://api.allorigins.win/raw?url=${encodedWidgetUrl}`,
-    `https://corsproxy.io/?${encodedWidgetUrl}`,
-    `https://r.jina.ai/${discordWidgetUrl}`
-  ];
-  const appendBust = (url) => `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
-  const fetchWidget = async (url) => {
-    const res = await fetch(appendBust(url), { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  };
-  (async () => {
-    for (const source of widgetSources) {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          const data = await fetchWidget(source);
-          const resolved = resolveMemberCount(data);
-          if (!Number.isFinite(resolved)) throw new Error('Invalid member count payload');
-          applyMemberCount(resolved);
-          return;
-        } catch (err) {
-          console.error('Failed to load Discord member count', err);
-        }
-      }
-    }
-    setMemberCountUnavailable();
-  })();
 }
+
+const chartCanvas = document.getElementById('factSplit');
+const factSplitMeta = document.getElementById('factSplitMeta');
+const summaryEl = document.getElementById('analysisSummary');
+const sourceEl = document.getElementById('analysisSource');
+const timestampEl = document.getElementById('analysisTimestamp');
+
+const textBox = document.getElementById('textBox');
+const countsEl = document.getElementById('counts');
+const analyzeBtn = document.getElementById('analyzeText');
+const analysisStatus = document.getElementById('analysisStatus');
 
 const urlForm = document.getElementById('urlForm');
 const urlInput = document.getElementById('urlInput');
 const urlStatus = document.getElementById('urlStatus');
+const urlSubmitBtn = document.getElementById('analyzeUrl');
 const clearUrlBtn = document.getElementById('clearUrl');
+
+const state = { chart: null, analyzing: false };
+
+const determineApiBase = () => {
+  if (typeof window === 'undefined') return '';
+  if (window.FACTTRACE_API_BASE) return String(window.FACTTRACE_API_BASE).replace(/\/$/, '');
+  const origin = window.location?.origin;
+  if (!origin || origin === 'null') return 'http://localhost:8787';
+  return '';
+};
+
+const apiBase = determineApiBase();
+const buildUrl = (path) => {
+  if (!path.startsWith('/')) path = `/${path}`;
+  return apiBase ? `${apiBase}${path}` : path;
+};
 
 const autoResize = (field) => {
   if (!field) return;
-  const base = Number(field.dataset.baseHeight) || field.clientHeight || 220;
-  field.dataset.baseHeight = base;
+  const base = Number(field.dataset.baseHeight) || 160;
   field.style.height = 'auto';
-  field.dataset.growing = 'true';
   const next = Math.max(base, field.scrollHeight);
   field.style.height = `${next}px`;
-  requestAnimationFrame(() => field.removeAttribute('data-growing'));
 };
 
-const attachAutoResize = (field) => {
-  if (!field) return;
-  autoResize(field);
-  field.addEventListener('input', () => autoResize(field));
+const updateCounts = () => {
+  if (!textBox || !countsEl) return;
+  const value = textBox.value || '';
+  const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+  const characters = value.length;
+  countsEl.textContent = `${words} ${words === 1 ? 'word' : 'words'} • ${characters} ${characters === 1 ? 'character' : 'characters'}`;
 };
 
-if (urlForm && urlInput && urlStatus) {
-  const setStatus = (message, state = '') => {
-    urlStatus.textContent = message;
-    if (state) {
-      urlStatus.dataset.state = state;
-    } else {
-      urlStatus.removeAttribute('data-state');
+const setStatusMessage = (message = '', variant = '') => {
+  if (!analysisStatus) return;
+  analysisStatus.textContent = message;
+  if (variant) analysisStatus.dataset.state = variant;
+  else delete analysisStatus.dataset.state;
+};
+
+const setUrlStatus = (message = '', variant = '') => {
+  if (!urlStatus) return;
+  urlStatus.textContent = message;
+  if (variant) urlStatus.dataset.state = variant;
+  else delete urlStatus.dataset.state;
+};
+
+const setAnalyzing = (value) => {
+  state.analyzing = value;
+  if (analyzeBtn) {
+    analyzeBtn.disabled = value;
+    analyzeBtn.textContent = value ? 'Analyzing…' : 'Verify Claim';
+  }
+  if (urlSubmitBtn) {
+    urlSubmitBtn.disabled = value;
+    urlSubmitBtn.textContent = value ? 'Analyzing…' : 'Analyze URL';
+  }
+};
+
+const ensureChart = () => {
+  if (state.chart || typeof Chart === 'undefined' || !chartCanvas) return state.chart;
+  const colors = ['#d70022', '#008f4c'];
+  const centerTag = {
+    id: 'centerTag',
+    afterDraw(chart) {
+      const {ctx, chartArea, data} = chart;
+      if (!chartArea) return;
+      const {left, right, top, bottom} = chartArea;
+      const x = (left + right) / 2;
+      const y = (top + bottom) / 2;
+      const dataset = data.datasets[0].data;
+      const maxValue = Math.max(...dataset);
+      const maxIndex = dataset.indexOf(maxValue);
+      const dominantColor = data.datasets[0].backgroundColor[maxIndex];
+      const dominantLabel = data.labels[maxIndex];
+
+      ctx.save();
+      ctx.fillStyle = dominantColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 32px "SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(`${maxValue}%`, x, y - 12);
+      ctx.font = '600 14px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(dominantLabel, x, y + 18);
+      ctx.restore();
     }
   };
 
-  attachAutoResize(urlInput);
-
-  urlForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const raw = urlInput.value.trim();
-    if (!raw) {
-      setStatus('Please paste a URL to analyze.', 'error');
-      urlInput.focus();
-      return;
-    }
-    try {
-      new URL(raw);
-    } catch (err) {
-      setStatus('That does not look like a valid URL.', 'error');
-      urlInput.focus();
-      return;
-    }
-
-    setStatus('URL saved. Analysis has been queued.', 'ready');
-    autoResize(urlInput);
+  state.chart = new Chart(chartCanvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Misinformation', 'Factual'],
+      datasets: [{
+        data: [50, 50],
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 0
+      }]
+    },
+    options: {
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      cutout: '65%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } }
+    },
+    plugins: [centerTag]
   });
 
-  if (clearUrlBtn) {
-    clearUrlBtn.addEventListener('click', () => {
-      urlInput.value = '';
-      setStatus('Waiting for a link…');
-      autoResize(urlInput);
-      urlInput.focus();
-    });
+  return state.chart;
+};
+
+const updateChartValues = (misinformation = 50, factual = 50) => {
+  const chart = ensureChart();
+  if (!chart) return;
+  chart.data.datasets[0].data = [misinformation, factual];
+  chart.update();
+  if (factSplitMeta) {
+    const dominant = factual >= misinformation ? 'factual' : 'misleading';
+    factSplitMeta.dataset.state = dominant;
+    factSplitMeta.textContent = `Result: ${misinformation}% misinformation • ${factual}% factual`;
   }
+};
+
+const safeHostname = (url) => {
+  try {
+    const host = new URL(url).hostname;
+    return host.replace(/^www\./, '');
+  } catch (_) {
+    return null;
+  }
+};
+
+const renderAnalysis = (payload) => {
+  const factual = Number(payload?.analysis?.factualPercentage) || 0;
+  const misinformation = Number(payload?.analysis?.misinformationPercentage) || 0;
+  updateChartValues(misinformation, factual);
+
+  if (summaryEl) {
+    summaryEl.textContent = payload?.analysis?.summary || payload?.article?.description || 'No summary returned.';
+  }
+  if (timestampEl) {
+    const date = payload?.analyzedAt ? new Date(payload.analyzedAt) : null;
+    if (date && !Number.isNaN(date.getTime())) {
+      timestampEl.textContent = date.toLocaleString();
+    } else if (payload?.analyzedAt) {
+      timestampEl.textContent = payload.analyzedAt;
+    } else {
+      timestampEl.textContent = '—';
+    }
+  }
+  if (sourceEl) {
+    if (payload?.article?.url) {
+      const label = payload.article.title || safeHostname(payload.article.url) || 'View article';
+      sourceEl.textContent = label;
+      sourceEl.href = payload.article.url;
+      sourceEl.target = '_blank';
+      sourceEl.rel = 'noopener';
+      sourceEl.style.pointerEvents = '';
+    } else {
+      sourceEl.textContent = 'Not available';
+      sourceEl.removeAttribute('href');
+      sourceEl.removeAttribute('target');
+      sourceEl.removeAttribute('rel');
+      sourceEl.style.pointerEvents = 'none';
+    }
+  }
+};
+
+const submitAnalysis = async ({ query, source }) => {
+  if (state.analyzing) return;
+  const sourceLabel = source === 'url' ? 'URL' : 'claim';
+  setStatusMessage(`Analyzing ${sourceLabel.toLowerCase()}…`, 'info');
+  if (source === 'url') setUrlStatus('Analyzing URL…', 'info');
+  setAnalyzing(true);
+  try {
+    const response = await fetch(buildUrl('/api/analyze'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (_) {
+      // ignore parse error to surface generic message below
+    }
+    if (!response.ok || !payload) {
+      const message = payload?.error || `Request failed (${response.status})`;
+      throw new Error(message);
+    }
+    renderAnalysis(payload);
+    setStatusMessage('Analysis complete ✓', 'success');
+    if (source === 'url') setUrlStatus('Analysis complete ✓', 'success');
+  } catch (err) {
+    console.error('Analysis failed', err);
+    const message = err.message || 'Unable to analyze at this time.';
+    setStatusMessage(message, 'error');
+    if (source === 'url') setUrlStatus(message, 'error');
+  } finally {
+    setAnalyzing(false);
+  }
+};
+
+const analyzeClaim = () => {
+  if (!textBox) return;
+  const query = textBox.value.trim();
+  if (!query) {
+    setStatusMessage('Please enter text before analyzing.', 'error');
+    textBox.focus();
+    return;
+  }
+  submitAnalysis({ query, source: 'text' });
+};
+
+if (analyzeBtn) {
+  analyzeBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    analyzeClaim();
+  });
 }
 
-const textBox = document.getElementById('textBox');
-const countsEl = document.getElementById('counts');
-const saveTextBtn = document.getElementById('saveText');
-const clearTextBtn = document.getElementById('clearText');
-
-if (textBox && countsEl) {
-  const storageKey = 'facttrace:text-draft';
-  let resetTimer = null;
-
-  attachAutoResize(textBox);
-
-  const applyCounts = (value) => {
-    const trimmed = value.trim();
-    const words = trimmed ? trimmed.split(/\s+/).length : 0;
-    const characters = value.length;
-    countsEl.textContent = `${words} words • ${characters} characters`;
-    if (countsEl.dataset.state) countsEl.removeAttribute('data-state');
-  };
-
-  const showTransientStatus = (message, state, duration = 2200) => {
-    countsEl.textContent = message;
-    countsEl.dataset.state = state;
-    if (resetTimer) clearTimeout(resetTimer);
-    resetTimer = setTimeout(() => {
-      applyCounts(textBox.value);
-    }, duration);
-  };
-
-  let stored = '';
-  try {
-    stored = localStorage.getItem(storageKey) || '';
-  } catch (err) {
-    console.warn('Unable to access stored text draft.', err);
-    stored = '';
-  }
-  if (stored) textBox.value = stored;
-  applyCounts(textBox.value);
-  autoResize(textBox);
-
-  textBox.addEventListener('input', (event) => {
-    applyCounts(event.target.value);
-    autoResize(event.target);
+if (textBox) {
+  textBox.addEventListener('input', () => {
+    updateCounts();
+    autoResize(textBox);
   });
-
   textBox.addEventListener('keydown', (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
-      try {
-        localStorage.setItem(storageKey, textBox.value);
-        showTransientStatus('Draft saved to browser storage.', 'ready');
-      } catch (err) {
-        console.warn('Unable to save draft via keyboard shortcut.', err);
-        showTransientStatus('Unable to save draft in this browser.', 'error', 2600);
-      }
+      analyzeClaim();
     }
   });
-
-  if (saveTextBtn) {
-    saveTextBtn.addEventListener('click', () => {
-      try {
-        localStorage.setItem(storageKey, textBox.value);
-        showTransientStatus('Draft saved to browser storage.', 'ready');
-      } catch (err) {
-        console.warn('Unable to save draft via button.', err);
-        showTransientStatus('Unable to save draft in this browser.', 'error', 2600);
-      }
-      autoResize(textBox);
-    });
-  }
-
-  if (clearTextBtn) {
-    clearTextBtn.addEventListener('click', () => {
-      textBox.value = '';
-      try {
-        localStorage.removeItem(storageKey);
-      } catch (err) {
-        console.warn('Unable to clear draft from storage.', err);
-      }
-      applyCounts('');
-      autoResize(textBox);
-      showTransientStatus('Workspace cleared.', 'ready', 1800);
-      textBox.focus();
-    });
-  }
+  updateCounts();
+  autoResize(textBox);
 }
+
+if (urlForm && urlInput) {
+  autoResize(urlInput);
+  urlForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (state.analyzing) return;
+    const value = urlInput.value.trim();
+    if (!value) {
+      setUrlStatus('Please paste a link to analyze.', 'error');
+      urlInput.focus();
+      return;
+    }
+    setUrlStatus('Analyzing URL…', 'info');
+    submitAnalysis({ query: value, source: 'url' });
+  });
+}
+
+if (clearUrlBtn && urlInput) {
+  clearUrlBtn.addEventListener('click', () => {
+    urlInput.value = '';
+    autoResize(urlInput);
+    setUrlStatus('Waiting for a link…');
+    urlInput.focus();
+  });
+}
+
+ensureChart();
+updateCounts();
+if (urlInput) autoResize(urlInput);
