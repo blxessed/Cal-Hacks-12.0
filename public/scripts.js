@@ -38,9 +38,9 @@ const insightsEl = document.getElementById('factSplitInsights');
 
 const RESULT_STORAGE_KEY = 'facttrace:lastResult';
 const DEFAULT_RESULT = {
-  misinformation: 62,
-  factual: 38,
-  summary: 'Viral clip omits key context from the full interview; official transcript contradicts the claim.'
+  misinformation: 18,
+  factual: 82,
+  summary: 'Corroborated reporting and primary documents align with this claim; only fringe commentary disputes it.'
 };
 
 const textBox = document.getElementById('textBox');
@@ -69,7 +69,7 @@ const determineApiBase = () => {
   const origin = window.location?.origin;
   const hostname = window.location?.hostname || '';
   const port = window.location?.port || '';
-  if (!origin || origin === 'null') return 'fact-trace-backend.rahimamjad0.workers.dev';
+  if (!origin || origin === 'null') return 'https://www.facttrace.tech';
   const localHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
   if (localHosts.has(hostname) && port !== '8787') {
     return 'http://localhost:8787';
@@ -197,7 +197,6 @@ const applyResult = (misinformation, factual, summary, options = {}) => {
   const mis = Math.max(0, Math.min(100, Math.round(misinformation)));
   const fac = Math.max(0, Math.min(100, Math.round(factual)));
   updateChartData(mis, fac);
-  setMeta(mis, fac, options);
   renderInsights(summary, mis, fac, options);
 };
 

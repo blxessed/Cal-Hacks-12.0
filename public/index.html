@@ -18,8 +18,10 @@
   <header>
     <div class="container nav">
       <a class="brand" href="#home" aria-label="FactTrace Home">
-        <img src="assets/logo.webp" class="logo">
-        <div class="brand-text"></div>
+        <img src="assets/logo.webp" class="logo" alt="">
+        <div>
+          <span class="brand-title">FactTrace</span>
+        </div>
       </a>
 
       <button class="menu" id="menuBtn" aria-label="Toggle navigation">☰</button>
@@ -27,37 +29,46 @@
         <ul id="navList">
           <li><a href="#home" class="active">Overview</a></li>
           <li><a href="#workspace">Workbench</a></li>
+          <li><a href="results.html">Latest result</a></li>
         </ul>
       </nav>
-      <!-- <div class="nav-actions">
-        <a class="btn primary" href="#workspace">Analyze</a>
-      </div> -->
+      <div class="nav-actions">
+        <a class="btn primary" href="#workspace">Start verifying</a>
+      </div>
     </div>
   </header>
 
   <main>
     <section id="home" class="hero">
       <div class="container hero-grid">
-        <div>
+        <div class="hero-copy">
           <div class="badges">
-            <span class="badge">Real Facts</span>
-            <span class="badge">News &amp; Posts</span>
-            <!-- <span class="badge">Social clips</span> -->
-            <span class="badge">AI-Powered</span>
+            <span class="badge">Realtime</span>
+            <span class="badge">Source-first</span>
+            <span class="badge">LLM verified</span>
           </div>
-          <h1>We give the <span class="gradient-text">real facts</span>.</h1>
-          <p>FactTrace analyzes links, claims, and snippets in real time. We surface trusted sources, run an LLM cross-check, and return a shareable misinformation score so you can judge any statement with confidence.</p>
+          <h1>Lets focus on the  <span class="gradient-text">facts</span></h1>
+          <p>FactTrace evaluates any quote or snippet against trusted reporting, measures bias and reliability, and returns an instant verdict you can share with your team or community.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#workspace">Paste a claim</a>
+            <a class="btn ghost" href="results.html">View sample verdict</a>
+          </div>
+          <ul class="hero-points">
+            <li>Cross-references claims against a curated reliability index.</li>
+            <li>Normalizes vague questions into clear statements before scoring.</li>
+            <li>Summarizes why a claim is factual, misleading, or undecided.</li>
+          </ul>
         </div>
 
         <article class="card-hero reveal" aria-labelledby="factSplitTitle">
           <div class="card-copy">
             <h3 id="factSplitTitle" class="mt-0">Result</h3>
-            <p class="meta" id="factSplitMeta" data-state="misleading">Example result: 62% misleading • 38% factual</p>
+            <p class="meta" id="factSplitMeta" data-state="factual"></p>
             <ul class="insight-list" id="factSplitInsights">
-              <li><strong>Summary:</strong> Viral clip omits key context from the full interview; official transcript contradicts the claim.</li>
-              <li><strong>Misleading:</strong> 62% of reviewed coverage flagged for sensational framing.</li>
-              <li><strong>Factual:</strong> 38% of sources provide corroborated information.</li>
-            </ul>
+              <li><strong>Summary:</strong> Corroborated reporting and official documents back the claim; fringe commentary disputes it.</li>
+            <li><strong style="color:#ef476f;">Misleading:</strong> 18% of the sample used outdated or editorialized evidence.</li>
+            <li><strong style="color:#1cc075;">Factual:</strong> 82% of sources cite verifiable data and primary quotes.</li>
+          </ul>
           </div>
           <div class="chart-wrap" role="img" aria-label="Misleading versus factual assessment">
             <canvas id="factSplit" width="200" height="200"></canvas>
@@ -69,20 +80,58 @@
     <section id="workspace" class="workspace">
       <div class="container">
         <article class="card analyze-card" aria-labelledby="textTitle">
-          <h2 id="textTitle">Verify a claim</h2>
-          <p class="muted">Paste the relevant passage or summary you want us to fact-check. If you have a link, open it and copy the important text instead of pasting the URL directly.</p>
-          <textarea id="textBox" placeholder="Paste the claim or article excerpt here…"></textarea>
+          <div class="workspace-head">
+            <div>
+              <p class="eyebrow">Claim workbench</p>
+              <h2 id="textTitle">Paste text, get a verdict in seconds.</h2>
+            </div>
+            <ul class="workspace-guidelines">
+              <li>Paste only the relevant passage — no URLs.</li>
+              <li>We normalize questions into statements automatically.</li>
+              <li>Each verdict includes source reliability and a summary.</li>
+            </ul>
+          </div>
+          <textarea id="textBox" placeholder="Example: It is claimed that the sky is blue because of ocean reflections."></textarea>
           <div class="analysis-feedback">
             <div>
               <div class="status" id="counts" aria-live="polite">0 words • 0 characters</div>
               <div class="status status-alert" id="analysisStatus" aria-live="polite"></div>
             </div>
             <div class="row">
-              <button class="btn" type="button" id="clearText">Clear</button>
-              <button class="btn primary" id="analyzeText">Verify</button>
+              <button class="btn ghost" type="button" id="clearText">Clear</button>
+              <button class="btn primary" id="analyzeText">Run analysis</button>
             </div>
           </div>
         </article>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <p class="eyebrow">How it works</p>
+            <h2 class="headline">Three passes for trustworthy answers.</h2>
+            <p class="lead">We combine news search, outlet reliability scoring, and a constrained LLM pass to keep verdicts grounded in verifiable reporting.</p>
+          </div>
+        </header>
+        <div class="grid-3">
+          <article class="tile">
+            <span class="step">01</span>
+            <h3>Find reliable coverage</h3>
+            <p>We map your claim to current reporting and filter results against a curated bias & reliability index.</p>
+          </article>
+          <article class="tile">
+            <span class="step">02</span>
+            <h3>Extract the evidence</h3>
+            <p>Articles are scraped, cleaned, and normalized into structured evidence packets for the language model.</p>
+          </article>
+          <article class="tile">
+            <span class="step">03</span>
+            <h3>Score the claim</h3>
+            <p>A deterministic Groq model returns factual vs. misinformation percentages plus a concise summary.</p>
+          </article>
+        </div>
       </div>
     </section>
   </main>
@@ -90,13 +139,6 @@
   <footer>
     <div class="container row justify-between">
       <div>© <span id="year"></span> FactTrace</div>
-      <div class="row">
-        <a href="#about">About</a>
-        <span>•</span>
-        <a href="#resources">Resources</a>
-        <span>•</span>
-        <a href="#contact">Contact</a>
-      </div>
     </div>
   </footer>
 
