@@ -53,7 +53,10 @@ const normalizePercentages = (factual, misinformation) => {
   };
 };
 
-const sanitizeText = (value = '') => value.replace(/\s+/g, ' ').trim();
+const sanitizeText = (value = '') => {
+  if (!value) return '';
+  return value.replace(/\s+/g, ' ').replace(/&nbsp;/gi, ' ').trim();
+};
 
 const stripHtml = (html = '') => {
   if (typeof html !== 'string') return '';
@@ -70,7 +73,8 @@ const fetchHtmlWithFallback = async (url) => {
   const normalized = stripQuery(url);
   const attempts = [
     { label: 'direct', target: url },
-    { label: 'r.jina.ai', target: `https://r.jina.ai/${normalized}` }
+    { label: 'r.jina.ai', target: `https://r.jina.ai/${normalized}` },
+    { label: 'textise dot iitty', target: `https://r.jina.ai/http://r.jina.ai/https://r.jina.ai/${normalized}` }
   ];
   const errors = [];
   for (const attempt of attempts) {
