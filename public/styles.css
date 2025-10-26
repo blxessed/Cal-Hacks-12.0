@@ -363,6 +363,12 @@ main { padding-bottom: 80px; }
   gap: 16px;
   margin-bottom: 12px;
 }
+.results-chart-wrap {
+  position: relative;
+  width: min(320px, 80vw);
+  margin: 0 auto 16px;
+}
+.results-chart-wrap canvas { width: 100% !important; height: auto !important; }
 .results-score {
   display: flex;
   gap: 18px;
@@ -370,6 +376,20 @@ main { padding-bottom: 80px; }
 .score-value {
   font-size: 1.6rem;
   font-weight: 700;
+}
+.chart-summary {
+  margin: 0 0 16px;
+  font-weight: 500;
+  color: var(--text);
+}
+.btn.secondary {
+  background: transparent;
+  border: 1px solid rgba(15,23,42,.18);
+  color: var(--text);
+}
+.btn.secondary:hover {
+  border-color: rgba(15,23,42,.4);
+  box-shadow: 0 10px 24px rgba(15,23,42,.08);
 }
 .results-details {
   margin: 0;
