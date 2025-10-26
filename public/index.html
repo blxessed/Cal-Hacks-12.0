@@ -171,7 +171,7 @@
     <section class="grid" aria-label="Three input areas">
       <div class="card" aria-labelledby="imagesTitle">
         <h2 id="imagesTitle">Images</h2>
-        <p class="muted">Upload one or more images to preview them below. We never upload — everything stays in your browser.</p>
+        <p class="muted">Upload one or more images to preview them below.</p>
         <label class="drop" id="imageDrop" aria-label="Image drop area" aria-live="polite">
           <div>
             <strong>Drop images here</strong>
@@ -186,27 +186,40 @@
         <div class="thumbs" id="thumbs" aria-live="polite"></div>
       </div>
 
-      <div class="card" aria-labelledby="filesTitle">
-        <h2 id="filesTitle">Files</h2>
-        <p class="muted">Add any files. We’ll list name, size, and type. You can open a temporary link to view or download.</p>
-        <label class="drop" id="fileDrop" aria-label="General files drop area" aria-live="polite">
-          <div>
-            <strong>Drop files here</strong>
-            <div class="muted">or</div>
-            <button class="btn" id="filePick">Choose files</button>
+      <div class="card" aria-labelledby="urlTitle">
+        <h2 id="urlTitle">URL</h2>
+        <p class="muted">Paste a link to an article, post, or video. We’ll pull the page details review it.</p>
+        <form id="urlForm" class="url-form">
+          <textarea
+            id="urlInput"
+            class="form-field auto-resize"
+            name="url"
+            inputmode="url"
+            placeholder="https://www.example.com"
+            aria-describedby="urlStatus"
+            data-base-height="220"
+            required
+          ></textarea>
+          <div class="row" style="align-items:center;justify-content:space-between">
+            <div class="status" id="urlStatus" aria-live="polite">Waiting for a link…</div>
+            <div class="row">
+              <button class="btn primary" type="submit">Analyze URL</button>
+              <button class="btn" type="button" id="clearUrl">Clear</button>
+            </div>
           </div>
-          <input id="fileInput" type="file" multiple />
-        </label>
-        <div class="row">
-          <button class="btn" id="clearFiles">Clear</button>
-        </div>
-        <div class="list" id="fileList" aria-live="polite"></div>
+        </form>
       </div>
 
       <div class="card" aria-labelledby="textTitle">
         <h2 id="textTitle">Text</h2>
-        <p class="muted">Paste or type any text. Live word & character counts; autosave to localStorage on <span class="kbd">⌘/Ctrl</span> + <span class="kbd">Enter</span>.</p>
-        <textarea id="textBox" placeholder="Start typing…"></textarea>
+        <p class="muted">Paste or type any text.</p>
+        <textarea
+          id="textBox"
+          class="form-field auto-resize"
+          placeholder="Start typing…"
+          aria-describedby="counts"
+          data-base-height="220"
+        ></textarea>
         <div class="row" style="align-items:center;justify-content:space-between">
           <div class="status" id="counts" aria-live="polite">0 words • 0 characters</div>
           <div class="row">
@@ -220,7 +233,7 @@
 
   
 
-    <div class="container">
+    <!-- <div class="container">
       <div class="cta reveal">
         <h2 class="headline m-0">Ready to build with us?</h2>
         <p class="lead">We onboard cohorts at the start of each term, and rolling members all semester.</p>
@@ -230,7 +243,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <footer>
     <div class="container row justify-between">
