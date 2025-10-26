@@ -115,7 +115,7 @@
       el.textContent = value ?? '—';
     };
 
-    setText('resultClaim', payload.query || 'Untitled claim');
+    setText('resultClaim', payload.normalizedClaim || payload.query || 'Untitled claim');
     setText('resultSummary', payload.analysis.summary || 'No summary provided.');
     const analyzedAt = payload.analyzedAt ? new Date(payload.analyzedAt) : null;
     setText('resultTimestamp', analyzedAt && !Number.isNaN(analyzedAt.getTime()) ? analyzedAt.toLocaleString() : payload.analyzedAt || '—');
