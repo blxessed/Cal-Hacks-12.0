@@ -38,18 +38,25 @@ const summaryEl = document.getElementById('analysisSummary');
 const sourceEl = document.getElementById('analysisSource');
 const timestampEl = document.getElementById('analysisTimestamp');
 
+const RESULT_STORAGE_KEY = 'facttrace:lastResult';
+
 const textBox = document.getElementById('textBox');
 const countsEl = document.getElementById('counts');
 const analyzeBtn = document.getElementById('analyzeText');
 const analysisStatus = document.getElementById('analysisStatus');
 
-const urlForm = document.getElementById('urlForm');
-const urlInput = document.getElementById('urlInput');
-const urlStatus = document.getElementById('urlStatus');
-const urlSubmitBtn = document.getElementById('analyzeUrl');
-const clearUrlBtn = document.getElementById('clearUrl');
+const clearTextBtn = document.getElementById('clearText');
 
-const state = { chart: null, analyzing: false };
+const state = { chart: null, analyzing: false, analyzeLabel: analyzeBtn ? analyzeBtn.textContent : 'Verify' };
+
+const persistResult = (payload) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('Unable to persist result snapshot', err);
+  }
+};
 
 const determineApiBase = () => {
   if (typeof window === 'undefined') return '';
@@ -96,22 +103,11 @@ const setStatusMessage = (message = '', variant = '') => {
   else delete analysisStatus.dataset.state;
 };
 
-const setUrlStatus = (message = '', variant = '') => {
-  if (!urlStatus) return;
-  urlStatus.textContent = message;
-  if (variant) urlStatus.dataset.state = variant;
-  else delete urlStatus.dataset.state;
-};
-
 const setAnalyzing = (value) => {
   state.analyzing = value;
   if (analyzeBtn) {
     analyzeBtn.disabled = value;
-    analyzeBtn.textContent = value ? 'Analyzing…' : 'Verify Claim';
-  }
-  if (urlSubmitBtn) {
-    urlSubmitBtn.disabled = value;
-    urlSubmitBtn.textContent = value ? 'Analyzing…' : 'Analyze URL';
+    analyzeBtn.textContent = value ? 'Analyzing…' : state.analyzeLabel;
   }
 };
 
@@ -223,11 +219,9 @@ const renderAnalysis = (payload) => {
   }
 };
 
-const submitAnalysis = async ({ query, source }) => {
+const submitAnalysis = async (query) => {
   if (state.analyzing) return;
-  const sourceLabel = source === 'url' ? 'URL' : 'claim';
-  setStatusMessage(`Analyzing ${sourceLabel.toLowerCase()}…`, 'info');
-  if (source === 'url') setUrlStatus('Analyzing URL…', 'info');
+  setStatusMessage('Analyzing…', 'info');
   setAnalyzing(true);
   try {
     const response = await fetch(buildUrl('/api/analyze'), {
@@ -247,12 +241,13 @@ const submitAnalysis = async ({ query, source }) => {
     }
     renderAnalysis(payload);
     setStatusMessage('Analysis complete ✓', 'success');
-    if (source === 'url') setUrlStatus('Analysis complete ✓', 'success');
+    persistResult(payload);
+    window.location.href = 'results.html';
+    return;
   } catch (err) {
     console.error('Analysis failed', err);
     const message = err.message || 'Unable to analyze at this time.';
     setStatusMessage(message, 'error');
-    if (source === 'url') setUrlStatus(message, 'error');
   } finally {
     setAnalyzing(false);
   }
@@ -266,7 +261,7 @@ const analyzeClaim = () => {
     textBox.focus();
     return;
   }
-  submitAnalysis({ query, source: 'text' });
+  submitAnalysis(query);
 };
 
 if (analyzeBtn) {
@@ -291,31 +286,14 @@ if (textBox) {
   autoResize(textBox);
 }
 
-if (urlForm && urlInput) {
-  autoResize(urlInput);
-  urlForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (state.analyzing) return;
-    const value = urlInput.value.trim();
-    if (!value) {
-      setUrlStatus('Please paste a link to analyze.', 'error');
-      urlInput.focus();
-      return;
-    }
-    setUrlStatus('Analyzing URL…', 'info');
-    submitAnalysis({ query: value, source: 'url' });
-  });
-}
-
-if (clearUrlBtn && urlInput) {
-  clearUrlBtn.addEventListener('click', () => {
-    urlInput.value = '';
-    autoResize(urlInput);
-    setUrlStatus('Waiting for a link…');
-    urlInput.focus();
-  });
-}
-
 ensureChart();
 updateCounts();
-if (urlInput) autoResize(urlInput);
+if (clearTextBtn && textBox) {
+  clearTextBtn.addEventListener('click', () => {
+    textBox.value = '';
+    updateCounts();
+    autoResize(textBox);
+    setStatusMessage('Workspace cleared.', 'success');
+    textBox.focus();
+  });
+}

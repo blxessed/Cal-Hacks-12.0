@@ -3,8 +3,166 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FactTrace • Analysis Results</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
+  <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-    <h1>Results</h1>
+<body class="results-body">
+  <header>
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="FactTrace Home">
+        <img src="assets/logo.webp" class="logo" alt="FactTrace" />
+        <div class="brand-text"></div>
+      </a>
+      <nav aria-label="Secondary">
+        <a class="btn" href="index.html">Run another analysis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container results-main">
+    <div id="resultsFallback" class="results-empty" hidden>
+      <h1>No stored analysis</h1>
+      <p>We couldn’t find a recent analysis to display. Head back to the workspace and run a new claim.</p>
+      <a class="btn primary" href="index.html">Go to workspace</a>
+    </div>
+
+    <div id="resultsContent" class="results-content" hidden>
+      <section class="results-card">
+        <p class="eyebrow" id="resultLabel">Latest analysis</p>
+        <h1 id="resultClaim" class="results-claim"></h1>
+        <p class="lead" id="resultSummary">Loading summary…</p>
+        <div class="results-meta">
+          <div>
+            <span class="meta-label">Checked</span>
+            <span id="resultTimestamp">—</span>
+          </div>
+          <div>
+            <span class="meta-label">Source</span>
+            <a id="resultSourceLink" target="_blank" rel="noopener">—</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="results-grid">
+        <article class="results-card" aria-labelledby="resultsChartTitle">
+          <div class="results-chart-header">
+            <h2 id="resultsChartTitle">Factual vs misinformation</h2>
+            <div class="results-score">
+              <div>
+                <span class="meta-label">Factual</span>
+                <span id="resultFactual" class="score-value">0%</span>
+              </div>
+              <div>
+                <span class="meta-label">Misinformation</span>
+                <span id="resultMisinformation" class="score-value">0%</span>
+              </div>
+            </div>
+          </div>
+          <canvas id="resultsChart" width="300" height="300" aria-label="Result chart"></canvas>
+        </article>
+
+        <article class="results-card" aria-labelledby="sourceDetailsTitle">
+          <h2 id="sourceDetailsTitle">Source reliability</h2>
+          <dl class="results-details">
+            <div>
+              <dt>Publisher</dt>
+              <dd id="resultPublisher">—</dd>
+            </div>
+            <div>
+              <dt>Bias mean</dt>
+              <dd id="resultBias">—</dd>
+            </div>
+            <div>
+              <dt>Reliability</dt>
+              <dd id="resultReliability">—</dd>
+            </div>
+          </dl>
+          <p class="muted" id="resultSnippet">Snippet unavailable.</p>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const STORAGE_KEY = 'facttrace:lastResult';
+    const fallback = document.getElementById('resultsFallback');
+    const content = document.getElementById('resultsContent');
+    let payload;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) payload = JSON.parse(raw);
+    } catch (err) {
+      console.warn('Unable to read stored result', err);
+    }
+    if (!payload || !payload.analysis) {
+      fallback.hidden = false;
+      content.hidden = true;
+      return;
+    }
+    content.hidden = false;
+    fallback.hidden = true;
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value ?? '—';
+    };
+
+    setText('resultClaim', payload.query || 'Untitled claim');
+    setText('resultSummary', payload.analysis.summary || 'No summary provided.');
+    const analyzedAt = payload.analyzedAt ? new Date(payload.analyzedAt) : null;
+    setText('resultTimestamp', analyzedAt && !Number.isNaN(analyzedAt.getTime()) ? analyzedAt.toLocaleString() : payload.analyzedAt || '—');
+
+    const article = payload.article || {};
+    const sourceLink = document.getElementById('resultSourceLink');
+    if (article.url) {
+      sourceLink.textContent = article.title || article.url;
+      sourceLink.href = article.url;
+    } else {
+      sourceLink.textContent = 'Not available';
+      sourceLink.removeAttribute('href');
+    }
+
+    setText('resultPublisher', article.publisher || article.title || 'Unknown publisher');
+
+    const reliability = article.reliability || {};
+    const biasValue = Number.isFinite(reliability.biasMean) ? `${reliability.biasMean.toFixed(2)} (${reliability.biasLabel || 'Unlabeled'})` : 'Not available';
+    const reliabilityValue = Number.isFinite(reliability.reliabilityMean) ? `${reliability.reliabilityMean.toFixed(2)} (${reliability.reliabilityLabel || 'Unlabeled'})` : 'Not available';
+    setText('resultBias', biasValue);
+    setText('resultReliability', reliabilityValue);
+    setText('resultSnippet', article.snippet || 'No article snippet available.');
+
+    const factual = Number(payload.analysis.factualPercentage) || 0;
+    const misinformation = Number(payload.analysis.misinformationPercentage) || 0;
+    setText('resultFactual', `${factual}%`);
+    setText('resultMisinformation', `${misinformation}%`);
+
+    if (typeof Chart !== 'undefined') {
+      new Chart(document.getElementById('resultsChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Misinformation', 'Factual'],
+          datasets: [{
+            data: [misinformation, factual],
+            backgroundColor: ['#d70022', '#008f4c'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '65%',
+          plugins: { legend: { display: false } },
+          animation: { duration: 800, easing: 'easeOutQuart' }
+        }
+      });
+    }
+  });
+  </script>
 </body>
 </html>

@@ -9,10 +9,7 @@
   <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico" />
   <link rel="manifest" href="site.webmanifest" />
   <title>FactTrace</title>
-  <meta name="description" content="FactTrace An AI-powered fact-checking platform that analyzes text, news, 
-                                    and claims in real time to verify accuracy and detect misinformation, 
-                                    helping users make informed, evidence-based decisions.." />
-                                     
+  <meta name="description" content="AI fact-checking platform" />
   <meta name="theme-color" content="#0b1220" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -25,219 +22,78 @@
         <div class="brand-text"></div>
       </a>
 
-       <button class="menu" id="menuBtn" aria-label="Toggle navigation">☰</button>
-        <ul id="navList" aria-label="Primary">
-      
-          <!-- <li><a href="#contact">Contact</a></li>
-          <li class="menu-cta"><a class="btn" href="#resources">Placeholder</a></li>
-          <li class="menu-cta"><a class="btn primary" href="https://discord.gg/A5M5fwWjrj" target="_blank" rel="noopener">Become a member</a></li> -->
+      <button class="menu" id="menuBtn" aria-label="Toggle navigation">☰</button>
+      <nav class="primary-nav" aria-label="Primary">
+        <ul id="navList">
+          <li><a href="#home" class="active">Overview</a></li>
+          <li><a href="#workspace">Workbench</a></li>
         </ul>
-      </nav> 
-
+      </nav>
       <div class="nav-actions">
-        <!-- <a class="btn primary" href="https://discord.gg/A5M5fwWjrj" target="_blank" rel="noopener">Become a member</a> -->
-      </div> 
+        <a class="btn primary" href="#workspace">Analyze</a>
+      </div>
     </div>
   </header>
 
-  <section id="home" class="hero">
-    <div class="container hero-grid">
-      <div>
-        <div class="badges">
-          <span class="badge">Real Facts</span>
-          <span class="badge">New Channels</span>
-          <span class="badge">Instagram</span>
-          <span class="badge">TikTok</span>
-
-          <span class="badge">AI-Powered Fact-Checking for the Information Age</span>
-          <span class="badge">Check Anything</span>
-        </div>
-        <h1>We give the <span class="gradient-text">real facts</span>.</h1>
-        <p>FactTrace An AI-powered fact-checking platform that analyzes text, news, 
-                                    and claims in real time to verify accuracy and detect misinformation, 
-                                    helping users make informed, evidence based decisions..</p>
-        <!-- <div class="row">
-          <a class="btn primary" href="" target="_blank" rel="noopener">Join the club</a>
-          <a class="btn" href="#programs">Explore programs</a>
-        </div> -->
-
-        
-        <div class="statbar">
-          <!-- <div class="stat"><div class="num" data-counter="-1" id="activeMembersCount">0</div><div class="meta">Active members</div></div> -->
-        </div>
-      </div>
-
-
-      <section class="card-hero reveal" aria-labelledby="factSplitTitle">
-        <div class="card-copy">
-          <h3 id="factSplitTitle" class="mt-0">Result</h3>
-          <p class="meta" id="factSplitMeta">Refreshing assessment…</p>
-          <ul class="insight-list" id="factSplitInsights">
-            <li><strong>Summary:</strong> Awaiting analysis.</li>
-            <li><strong>Misleading:</strong> Pending.</li>
-            <li><strong>Factual:</strong> Pending.</li>
-          </ul>
-        </div>
-        <div class="chart-wrap" role="img" aria-label="Misleading versus factual assessment">
-          <canvas id="factSplit" width="200" height="200"></canvas>
-        </div>
-      </section>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          
-        <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const misleading = Math.floor(Math.random() * 41) + 30; // 30–70% misleading
-      const factual = 100 - misleading;
-      const ctxEl = document.getElementById('factSplit');
-      const meta = document.getElementById('factSplitMeta');
-      const insights = document.getElementById('factSplitInsights');
-
-      if (!ctxEl) return;
-
-      const labels = ['Misleading', 'Factual'];
-      const values = [misleading, factual];
-      const colors = ['#d70022', '#008f4c'];
-
-      const centerTag = {
-        id: 'centerTag',
-        afterDraw(chart) {
-          const {ctx, chartArea, data} = chart;
-          if (!chartArea) return;
-          const {left, right, top, bottom} = chartArea;
-          const x = (left + right) / 2;
-          const y = (top + bottom) / 2;
-          const dataset = data.datasets[0].data;
-          const maxValue = Math.max(...dataset);
-          const maxIndex = dataset.indexOf(maxValue);
-          const dominantColor = data.datasets[0].backgroundColor[maxIndex];
-          const dominantLabel = data.labels[maxIndex];
-
-          ctx.save();
-          ctx.fillStyle = dominantColor;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.font = '600 32px "SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-          ctx.fillText(`${maxValue}%`, x, y - 12);
-          ctx.font = '600 14px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-          ctx.fillText(dominantLabel, x, y + 18);
-          ctx.restore();
-        }
-      };
-
-      new Chart(ctxEl, {
-        type: 'doughnut',
-        data: {
-          labels,
-          datasets: [{
-            data: values,
-            backgroundColor: colors,
-            borderWidth: 0,
-            hoverOffset: 0
-          }]
-        },
-        options: {
-          animation: { duration: 1100, easing: 'easeOutQuart' },
-          cutout: '65%',
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: false }
-          }
-        },
-        plugins: [centerTag]
-      });
-
-      meta.textContent = `${misleading}% misleading • ${factual}% factual`;
-      meta.dataset.state = '';
-
-      if (insights) {
-        const dominantLabel = misleading >= factual ? 'misleading' : 'factual';
-        const summaryLine = dominantLabel === 'misleading'
-          ? 'Narrative leans misleading with limited supporting evidence.'
-          : 'Coverage remains primarily factual with corroborated sources.';
-
-        insights.innerHTML = `
-          <li><strong>Summary:</strong> ${summaryLine}</li>
-  
-        `.trim();
-      }
-    });
-        </script>
-    </div>
-  </section>
-
-    <main class="container">
-    <!-- <p class="muted">Drag & drop files anywhere. Use <span class="kbd">⌘/Ctrl</span> + <span class="kbd">Enter</span> in the text box to save to localStorage.</p> -->
-
-    <section class="grid" aria-label="Three input areas">
-      <div class="card" aria-labelledby="imagesTitle">
-        <h2 id="imagesTitle">Images</h2>
-        <p class="muted">Upload one or more images to preview them below.</p>
-        <label class="drop" id="imageDrop" aria-label="Image drop area" aria-live="polite">
-          <div>
-            <strong>Drop images here</strong>
-            <div class="muted">or</div>
-            <button class="btn" id="imagePick">Choose images</button>
+  <main>
+    <section id="home" class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="badges">
+            <span class="badge">Real Facts</span>
+            <span class="badge">News &amp; Posts</span>
+            <span class="badge">Social clips</span>
+            <span class="badge">AI-Powered</span>
           </div>
-          <input id="imageInput" type="file" accept="image/*" multiple />
-        </label>
-        <div class="row">
-          <button class="btn" id="clearImages">Clear</button>
+          <h1>We give the <span class="gradient-text">real facts</span>.</h1>
+          <p>FactTrace analyzes links, claims, and snippets in real time. We surface trusted sources, run an LLM cross-check, and return a shareable misinformation score so you can judge any statement with confidence.</p>
         </div>
-        <div class="thumbs" id="thumbs" aria-live="polite"></div>
-      </div>
 
-      <div class="card" aria-labelledby="urlTitle">
-        <h2 id="urlTitle">URL</h2>
-        <p class="muted">Paste a link to an article, post, or video. We’ll pull the page details review it.</p>
-        <form id="urlForm" class="url-form">
-          <input
-            type="url"
-            id="urlInput"
-            class="form-field"
-            name="url"
-            inputmode="url"
-            placeholder="https://www.example.com"
-            aria-describedby="urlStatus"
-            required
-          />
-          <div class="row" style="align-items:center;justify-content:space-between">
-            <div class="status" id="urlStatus" aria-live="polite">Waiting for a link…</div>
-            <div class="row">
-              <button class="btn primary" type="submit">Analyze URL</button>
-              <button class="btn" type="button" id="clearUrl">Clear</button>
+        <article class="card-hero reveal" aria-labelledby="factSplitTitle">
+          <div class="card-copy">
+            <h3 id="factSplitTitle" class="mt-0">Latest Result</h3>
+            <p class="meta" id="factSplitMeta">Run an analysis to generate live results.</p>
+            <div class="analysis-details" id="analysisDetails">
+              <p class="analysis-summary" id="analysisSummary">Submit a claim and we’ll summarize the article we trust most.</p>
+              <dl class="analysis-meta">
+                <div>
+                  <dt>Source</dt>
+                  <dd><a id="analysisSource" target="_blank" rel="noopener">Not available</a></dd>
+                </div>
+                <div>
+                  <dt>Checked</dt>
+                  <dd id="analysisTimestamp">—</dd>
+                </div>
+              </dl>
             </div>
           </div>
-        </form>
-      </div>
-
-      <div class="card" aria-labelledby="textTitle">
-        <h2 id="textTitle">Text</h2>
-        <p class="muted">Paste or type any text.</p>
-        <textarea id="textBox" class="form-field" placeholder="Start typing…" aria-describedby="counts"></textarea>
-        <div class="row" style="align-items:center;justify-content:space-between">
-          <div class="status" id="counts" aria-live="polite">0 words • 0 characters</div>
-          <div class="row">
-            <button class="btn" id="saveText">Save</button>
-            <button class="btn" id="clearText">Clear</button>
+          <div class="chart-wrap" role="img" aria-label="Misleading versus factual assessment">
+            <canvas id="factSplit" width="200" height="200"></canvas>
           </div>
-        </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="workspace" class="workspace">
+      <div class="container">
+        <article class="card analyze-card" aria-labelledby="textTitle">
+          <h2 id="textTitle">Verify a link or claim</h2>
+          <p class="muted">Paste a URL with optional context, or type any statement you want us to fact-check. We’ll fetch the page if a link is present and analyze its contents using our reliability dataset.</p>
+          <textarea id="textBox" placeholder="Paste a link and/or text to verify…"></textarea>
+          <div class="analysis-feedback">
+            <div>
+              <div class="status" id="counts" aria-live="polite">0 words • 0 characters</div>
+              <div class="status status-alert" id="analysisStatus" aria-live="polite"></div>
+            </div>
+            <div class="row">
+              <button class="btn" type="button" id="clearText">Clear</button>
+              <button class="btn primary" id="analyzeText">Verify</button>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
   </main>
-
-  
-
-    <!-- <div class="container">
-      <div class="cta reveal">
-        <h2 class="headline m-0">Ready to build with us?</h2>
-        <p class="lead">We onboard cohorts at the start of each term, and rolling members all semester.</p>
-        <div class="row justify-center">
-          <a class="btn primary" href="#contact">Apply</a>
-          <a class="btn" href="#resources">See curriculum</a>
-        </div>
-      </div>
-    </div>
-  </section> -->
 
   <footer>
     <div class="container row justify-between">
@@ -254,6 +110,7 @@
 
   <a href="#home" class="to-top" id="toTop" aria-label="Back to top">↑</a>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="scripts.js"></script>
 </body>
 </html>
