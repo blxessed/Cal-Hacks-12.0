@@ -290,7 +290,7 @@ footer {
 }
 .results-claim { font-size: clamp(32px, 3.8vw, 48px); margin: 8px 0 12px; }
 .results-meta { display: flex; gap: 24px; flex-wrap: wrap; color: var(--muted); }
-.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+.results-grid { display: flex; flex-direction: column; gap: 30px; }
 .results-chart-wrap { width: min(320px, 80vw); margin: 0 auto 18px; }
 .verdict-banner { margin: 0 0 6px; font-weight: 600; font-size: 1rem; }
 .verdict-banner.verdict-factual { color: var(--accent); }
@@ -313,6 +313,18 @@ verdict-banner.verdict-misinformation { color: var(--danger); }
 .results-details { margin: 0; display: grid; gap: 12px; }
 .results-details dt { color: var(--muted); }
 .results-details dd { margin: 0; font-weight: 600; }
+.results-raw {
+  background: var(--panel-muted);
+  border: 1px solid rgba(15,28,47,.1);
+  border-radius: 16px;
+  padding: 18px;
+  color: var(--muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: .85rem;
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
 .results-empty {
   text-align: center;
   border: 1px dashed rgba(15,28,47,.15);
